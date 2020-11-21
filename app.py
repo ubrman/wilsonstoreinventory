@@ -52,10 +52,16 @@ def read_csv():
             except IntegrityError:
                 updated = Product.get(product_name=row['product_name'])
                 updated.product_name = row['product_name']
-                updated.product_quantity = row['product_quantity']
-                updated.product_price = row['product_price']
-                updated.date_updated = row['date_updated']
-                updated.save()
+                if updated.date_updated < row['date_updated']:
+                    updated.product_quantity = row['product_quantity']
+                    updated.product_price = row['product_price']
+                    updated.date_updated = row['date_updated']
+                    updated.save()
+                else:
+                    updated.product_quantity = updated.product_quantity
+                    updated.product_price = updated.product_price
+                    updated.date_updated = updated.date_updated
+                    updated.save()
 
 
 def menu_loop():
@@ -85,7 +91,7 @@ def backup_data():
     field_titles = [
         'product_name',
         'product_price',
-        'product quantity',
+        'product_quantity',
         'date_updated',
     ]
 
@@ -168,7 +174,6 @@ def add_product():
 
 def show_product():
     """Show product Using ID Number"""
-
     while True:
         try:
             id_num = display_products(int(input("Please enter a valid product ID number: ")))
@@ -182,7 +187,6 @@ def show_product():
 
 def display_products(id_num=None):
     """View All products"""
-
     all_items = Product.select().order_by(Product.product_id.asc())
 
     if id_num:
@@ -194,12 +198,13 @@ def display_products(id_num=None):
         print(f" product Quantity: {items.product_quantity}")
         print(f" product Price: {items.product_price}")
         print(f" Last Updated: {items.date_updated}\n\n")
-        print(f" Press n for next entry or m to get to the menu")
+        print(f"Press n for next entry or m to get to the menu")
         action = input("What would you like to do? ").lower().strip()
         if action == 'm':
             break
         elif action == 'n':
             clear()
+
 
 
 menu_list = OrderedDict([('a', add_product),
